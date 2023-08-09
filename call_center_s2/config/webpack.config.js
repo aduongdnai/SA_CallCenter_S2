@@ -187,6 +187,9 @@ module.exports = function (webpackEnv) {
   };
 
   return {
+    node: {
+      global: false
+    },
     target: ['browserslist'],
     // Webpack noise constrained to errors and warnings
     stats: 'errors-warnings',
