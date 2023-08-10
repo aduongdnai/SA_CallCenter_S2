@@ -564,7 +564,7 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     plugins: [
-      new webpack.EnvironmentPlugin(['GoongAccessToken']),
+      
       new NodePolyfillPlugin(),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(

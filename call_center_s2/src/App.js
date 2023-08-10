@@ -1,13 +1,13 @@
 import logo from './logo.svg';
 import './App.css';
 import Map from './components/Map';
-const apikey = 'JEOSITe0KW0CSK5GkjLrSZil_pX7U6brlvA0Jy68QSU'
+import CallCenterS2 from './features/CallCenterS2'
 function App() {
 
   return (
     <div className="App">
        <div>
-       <Map apikey={apikey} />
+       <CallCenterS2  />
      </div>
     </div>
   );
