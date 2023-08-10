@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.16.0",
-    "@here/maps-api-for-javascript": "^1.45.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@svgr/webpack": "^5.5.0",
     "@testing-library/jest-dom": "^5.17.0",
@@ -33,6 +32,8 @@
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
     "mini-css-extract-plugin": "^2.4.5",
+    "mqtt": "^5.0.2",
+    "node-polyfill-webpack-plugin": "^2.0.1",
     "postcss": "^8.4.4",
     "postcss-flexbugs-fixes": "^5.0.2",
     "postcss-loader": "^6.2.1",

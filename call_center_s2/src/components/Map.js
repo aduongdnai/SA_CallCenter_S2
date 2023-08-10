@@ -1,57 +1,82 @@
-import React, { useEffect, useRef } from 'react';
-import H from '@here/maps-api-for-javascript';
+import React, { useEffect, useRef,useState } from 'react';
+
 import {useForm} from 'react-hook-form'
+import mqtt from 'mqtt'
 
 const Map = ( props ) => {
-    const mapRef = useRef(null);
-    const map = useRef(null);
-    const platform = useRef(null)
-    const { apikey } = props;
-    useEffect(
-        () => {
-          // Check if the map object has already been created
-          if (!map.current) {
-            // Create a platform object with the API key
-            platform.current = new H.service.Platform({ apikey });
-            // Create a new Raster Tile service instance
-            const rasterTileService = platform.current.getRasterTileService({
-              queryParams: {
-                style: "explore.day",
-                size: 512,
-              },
-            });
-            // Creates a new instance of the H.service.rasterTile.Provider class
-            // The class provides raster tiles for a given tile layer ID and pixel format
-            const rasterTileProvider = new H.service.rasterTile.Provider(
-              rasterTileService
-            );
-            // Create a new Tile layer with the Raster Tile provider
-            const rasterTileLayer = new H.map.layer.TileLayer(rasterTileProvider);
-            // Create a new map instance with the Tile layer, center and zoom level
-            const newMap = new H.Map(mapRef.current, rasterTileLayer, {
-              pixelRatio: window.devicePixelRatio,
-              center: { lat: 14.0583, lng: 108.2772 },
-              zoom: 7,
-            });
-     
-            // Add panning and zooming behavior to the map
-            const behavior = new H.mapevents.Behavior(
-              new H.mapevents.MapEvents(newMap)
-            );
-     
-            // Set the map object to the reference
-            map.current = newMap;
-          }
-        },
-        // Dependencies array
-        [apikey]
-      );
+    
       const { register, handleSubmit, watch, formState: { errors } } = useForm();
-      const onSubmit = (data) =>{ console.log(data);} 
+      const [client, setClient] = useState(null)
+      const [isSubed, setIsSub] = useState(false)
+      const [payload, setPayload] = useState({})
+      const [connectStatus, setConnectStatus] = useState('Connect')
+      const mqttConnect = (host, mqttOption) => {
+        console.log('Connecting to host:', host);
+        console.log('MQTT options:', mqttOption);
+        setConnectStatus('Connecting');
+        setClient(mqtt.connect(host,mqttOption));
+      };
+        useEffect(() => {
+          
+          if (client) {
+             
+            client.on('connect', () => {
+              setConnectStatus('Connected');
+            });
+            client.on('error', (err) => {
+              console.error('Connection error: ', err);
+              console.log('err');
+              client.end();
+            });
+            client.on('reconnect', () => {
+              setConnectStatus('Reconnecting');
+            });
+            client.on('message', (topic, message) => {
+              const payload = { topic, message: message.toString() };
+              setPayload(payload);
+            });
+          }
+        }, [client]);
+        const initialConnectionOptions = {
+          // ws or wss
+          protocol: 'ws',
+          host: 'broker.emqx.io',
+          clientId: 'emqx_react_' + Math.random().toString(16).substring(2, 8),
+          // ws -> 8083; wss -> 8084
+          port: 8083,
+          /**
+           * By default, EMQX allows clients to connect without authentication.
+           * https://docs.emqx.com/en/enterprise/v4.4/advanced/auth.html#anonymous-login
+           */
+          username: 'emqx_test',
+          password: 'emqx_test'
+        }
+        
+        const mqttPublish = (context) => {
+          if (client) {
+          console.log(context);
+            const { topic, qos, payload } = context;
+            client.publish(topic, payload, { qos }, error => {
+              if (error) {
+                console.log('Publish error: ', error);
+              }
+            });
+          }
+        }
+        const mqttDisconnect = () => {
+          if (client) {
+            client.end(() => {
+              setConnectStatus('Connect');
+            });
+          }
+        }
+      const onSubmit = (data) =>{ console.log(data);
+      
+        mqttConnect('ws://broker.emqx.io:8083/mqtt',initialConnectionOptions)} 
       // Return a div element to hold the map
       return (
         <div>
-            <div style={ { width: "300px", height: "300px" } } ref={mapRef} />
+            
             <div>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <input {...register('query',{ required: true })} type='text' placeholder='Search'></input>

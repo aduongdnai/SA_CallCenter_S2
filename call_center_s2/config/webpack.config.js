@@ -1,5 +1,5 @@
 'use strict';
-
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 const fs = require('fs');
 const path = require('path');
 const webpack = require('webpack');
@@ -187,9 +187,7 @@ module.exports = function (webpackEnv) {
   };
 
   return {
-    node: {
-      global: false
-    },
+   
     target: ['browserslist'],
     // Webpack noise constrained to errors and warnings
     stats: 'errors-warnings',
@@ -566,6 +564,8 @@ module.exports = function (webpackEnv) {
       ].filter(Boolean),
     },
     plugins: [
+      new webpack.EnvironmentPlugin(['GoongAccessToken']),
+      new NodePolyfillPlugin(),
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
         Object.assign(
